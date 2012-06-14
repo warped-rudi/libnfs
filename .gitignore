@@ -13,6 +13,7 @@
 *.pdb
 *.ex?
 *-stamp
+libnfs-raw-*.x
 Makefile
 examples/nfsclient-raw
 examples/nfsclient-sync
