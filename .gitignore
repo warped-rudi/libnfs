@@ -6,6 +6,12 @@
 *.a
 *.lo
 *.o
+*.obj
+*.lib
+*.dll
+*.ilk
+*.pdb
+*.ex?
 *-stamp
 Makefile
 examples/nfsclient-raw
