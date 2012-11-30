@@ -19,9 +19,11 @@
  * Through this interface you have access to the full gamut of nfs and nfs related
  * protocol as well as the XDR encoded/decoded structures.
  */
+#ifndef _LIBNFS_RAW_H_
+#define _LIBNFS_RAW_H_
+
 #include <stdint.h>
-#include <rpc/rpc.h>
-#include <rpc/auth.h>
+#include <nfsc/libnfs-zdr.h>
 
 struct rpc_data {
        int size;
@@ -32,7 +34,7 @@ struct rpc_context;
 struct rpc_context *rpc_init_context(void);
 void rpc_destroy_context(struct rpc_context *rpc);
 
-void rpc_set_auth(struct rpc_context *rpc, AUTH *auth);
+void rpc_set_auth(struct rpc_context *rpc, struct AUTH *auth);
 
 int rpc_get_fd(struct rpc_context *rpc);
 int rpc_which_events(struct rpc_context *rpc);
@@ -160,7 +162,7 @@ int rpc_pmap_unset_async(struct rpc_context *rpc, int program, int version, int 
  * RPC_STATUS_CANCEL : The connection attempt was aborted before it could complete.
  *                     data is NULL.
  */
-int rpc_pmap_callit_async(struct rpc_context *rpc, int program, int version, int procedure, const char *data, int datalen, rpc_cb cb, void *private_data);
+int rpc_pmap_callit_async(struct rpc_context *rpc, int program, int version, int procedure, char *data, int datalen, rpc_cb cb, void *private_data);
 
 /* 
  * MOUNT FUNCTIONS
@@ -916,3 +918,5 @@ int rpc_nlm4_cancel_async(struct rpc_context *rpc, rpc_cb cb, struct NLM4_CANCar
  */
 struct NLM4_UNLOCKargs;
 int rpc_nlm4_unlock_async(struct rpc_context *rpc, rpc_cb cb, struct NLM4_UNLOCKargs *args, void *private_data);
+
+#endif

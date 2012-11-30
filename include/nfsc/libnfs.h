@@ -18,8 +18,9 @@
  * This is the highlevel interface to access NFS resources using a posix-like interface
  */
 #include <stdint.h>
-#include <rpc/rpc.h>
-#include <rpc/auth.h>
+#if defined(ANDROID)
+#include <sys/time.h>
+#endif
 
 struct nfs_context;
 struct rpc_context;
@@ -64,7 +65,8 @@ EXTERN int nfs_queue_length(struct nfs_context *nfs);
 /*
  * Used if you need different credentials than the default for the current user.
  */
-EXTERN void nfs_set_auth(struct nfs_context *nfs, AUTH *auth);
+struct AUTH;
+EXTERN void nfs_set_auth(struct nfs_context *nfs, struct AUTH *auth);
 
 
 /*

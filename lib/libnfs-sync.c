@@ -23,7 +23,13 @@
 #else
 #include <strings.h>
 #include <unistd.h>
+#ifndef ANDROID
 #include <sys/statvfs.h>
+#else
+#include <netinet/in.h>
+#include <sys/vfs.h>
+#define statvfs statfs
+#endif
 #include <poll.h>
 #include <sys/ioctl.h>
 #include <netdb.h>
@@ -38,6 +44,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -47,6 +54,7 @@
 #include <sys/sockio.h>
 #endif
 
+#include "libnfs-zdr.h"
 #include "libnfs.h"
 #include "libnfs-raw.h"
 #include "libnfs-raw-mount.h"
@@ -65,6 +73,8 @@ struct sync_cb_data {
 static void wait_for_reply(struct rpc_context *rpc, struct sync_cb_data *cb_data)
 {
 	struct pollfd pfd;
+
+	assert(rpc->magic == RPC_CONTEXT_MAGIC);
 
 	while (!cb_data->is_finished) {
 
@@ -133,6 +143,8 @@ int nfs_mount(struct nfs_context *nfs, const char *server, const char *export)
 {
 	struct sync_cb_data cb_data;
 	struct rpc_context *rpc = nfs_get_rpc_context(nfs);
+
+	assert(rpc->magic == RPC_CONTEXT_MAGIC);
 
 	cb_data.is_finished = 0;
 
@@ -1146,7 +1158,9 @@ int nfs_link(struct nfs_context *nfs, const char *oldpath, const char *newpath)
 void mount_getexports_cb(struct rpc_context *mount_context, int status, void *data, void *private_data)
 {
 	struct sync_cb_data *cb_data = private_data;
-	exports export = *(exports *)data;
+	exports export;
+
+	assert(mount_context->magic == RPC_CONTEXT_MAGIC);
 
 	cb_data->is_finished = 1;
 	cb_data->status = status;
@@ -1157,6 +1171,7 @@ void mount_getexports_cb(struct rpc_context *mount_context, int status, void *da
 		return;
 	}
 
+	export = *(exports *)data;
 	while (export != NULL) {
 		exports new_export;
 
@@ -1228,6 +1243,8 @@ void callit_cb(struct rpc_context *rpc, int status, void *data _U_, void *privat
 	char hostdd[16];
 	struct nfs_server_list *srvr;
 
+	assert(rpc->magic == RPC_CONTEXT_MAGIC);
+
 	if (status == RPC_STATUS_CANCEL) {
 		return;
 	}
@@ -1280,6 +1297,8 @@ void callit_cb(struct rpc_context *rpc, int status, void *data _U_, void *privat
 static int send_nfsd_probes(struct rpc_context *rpc, INTERFACE_INFO *InterfaceList, int numIfs, struct nfs_list_data *data)
 {
   int i=0;
+
+  assert(rpc->magic == RPC_CONTEXT_MAGIC);
 
   for(i = 0; i < numIfs; i++) 
   {
@@ -1410,6 +1429,8 @@ struct nfs_server_list *nfs_find_local_servers(void)
 static int send_nfsd_probes(struct rpc_context *rpc, struct ifconf *ifc, struct nfs_list_data *data)
 {
 	char *ptr;
+
+	assert(rpc->magic == RPC_CONTEXT_MAGIC);
 
 	for (ptr =(char *)(ifc->ifc_buf); ptr < (char *)(ifc->ifc_buf) + ifc->ifc_len; ) {
 		struct ifreq *ifr;
